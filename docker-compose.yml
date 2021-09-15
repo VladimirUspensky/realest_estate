@@ -1,0 +1,39 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: .
+    image: vladimiruspensky/realest_estate_backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: database
+    command: /bin/sh -c "python3 manage.py migrate --no-input &&
+                         python3 manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - database
+    hostname: backend
+  frontend:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    image: vladimiruspensky/realest_estate_frontend:latest
+    ports:
+      - "3000:3000"
+    command: yarn start
+    stdin_open: true
+    depends_on:
+      - backend
+  database:
+    image: postgres
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_DB: realest_estate_db
+      POSTGRES_USER: realest_estate_user
+      POSTGRES_PASSWORD: qwerty
+    volumes:
+      - realest_estate_db:/var/lib/postgresql/data
+    hostname: database
+volumes:
+  realest_estate_db:
